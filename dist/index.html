@@ -3,63 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#081a2b" />
-    <title>Signal K History Explorer</title>
-    <meta name="description" content="Explorer les données historisées de Signal K" />
+    <meta name="theme-color" content="#071c2b" />
+    <title>Signal K — History Explorer</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <aside class="sidebar" aria-label="Configuration de la requête">
-        <div class="brand"><span class="brand-mark">⌁</span><span>Signal K</span><strong>HISTORY</strong></div>
-        <div class="connection-card">
-          <div class="connection-heading"><span class="status-dot"></span><span id="connection-label">Mode démo</span></div>
-          <label class="label" for="server-url">Serveur Signal K</label>
-          <div class="server-input"><input id="server-url" type="url" placeholder="http://localhost:3000" aria-label="Adresse du serveur Signal K" /><button id="connect-button" title="Se connecter au serveur">↗</button></div>
-          <p id="connection-note">Les valeurs simulées permettent d’essayer l’interface.</p>
+    <main class="app-shell">
+      <header class="app-header">
+        <div class="brand"><span class="brand-mark">⌁</span><span>Signal K</span><strong>HISTORY EXPLORER</strong></div>
+        <div id="api-state" class="api-state"><i></i>Connexion à l’historique…</div>
+      </header>
+
+      <section class="period-bar" aria-label="Période à explorer">
+        <div class="period-copy"><span>Explorer la période</span><small>Les paths affichés ont des données dans cet intervalle.</small></div>
+        <label>Début<input id="from-date" type="datetime-local" /></label>
+        <span class="date-arrow">→</span>
+        <label>Fin<input id="to-date" type="datetime-local" /></label>
+        <button id="apply-period" class="primary-button">Rechercher</button>
+      </section>
+
+      <section class="explorer" aria-labelledby="explorer-title">
+        <div class="explorer-heading">
+          <div><p class="eyebrow">HISTORIQUE DISPONIBLE</p><h1 id="explorer-title">Paths</h1><p id="range-caption">Choisissez une période pour découvrir les données.</p></div>
+          <div class="heading-actions"><button id="collapse-all" class="quiet-button">Tout replier</button><button id="export-button" class="quiet-button">Exporter le path ouvert</button></div>
         </div>
 
-        <section class="controls" aria-labelledby="period-title">
-          <h2 id="period-title">Période</h2>
-          <div class="quick-ranges" role="group" aria-label="Raccourcis de période">
-            <button data-duration="PT15M">15 min</button><button data-duration="PT1H">1 h</button><button class="active" data-duration="PT24H">24 h</button><button data-duration="P7D">7 j</button>
-          </div>
-          <label class="label" for="from-date">Du</label><input id="from-date" type="datetime-local" />
-          <label class="label" for="to-date">Au</label><input id="to-date" type="datetime-local" />
-          <div class="two-cols"><label class="label">Résolution<select id="resolution"><option value="">Auto</option><option value="10">10 s</option><option value="60">1 min</option><option value="300">5 min</option><option value="900">15 min</option></select></label><label class="label">Agrégation<select id="aggregate"><option value="average">Moyenne</option><option value="min">Minimum</option><option value="max">Maximum</option><option value="last">Dernière</option></select></label></div>
-        </section>
+        <div class="path-toolbar">
+          <div class="search-box"><span>⌕</span><input id="path-filter" type="search" placeholder="Filtrer les paths, par ex. wind, propulsion, battery…" autocomplete="off" /></div>
+          <span id="paths-count" class="result-count">—</span>
+        </div>
 
-        <section class="paths" aria-labelledby="paths-title">
-          <div class="section-title"><h2 id="paths-title">Données</h2><span id="selected-count">3 sélectionnées</span></div>
-          <input id="path-filter" class="path-filter" type="search" placeholder="Rechercher un path…" aria-label="Rechercher un path" />
-          <div id="path-list" class="path-list"></div>
-        </section>
-        <button id="run-button" class="run-button">Actualiser les données <span>→</span></button>
-      </aside>
-
-      <section class="workspace">
-        <header class="topbar">
-          <div><p class="eyebrow">EXPLORATEUR D’HISTORIQUE</p><h1>Journal de bord</h1></div>
-          <div class="top-actions"><button id="clear-button" class="quiet-button">Effacer la sélection</button><button id="export-button" class="export-button">↓ Exporter CSV</button></div>
-        </header>
-
-        <section class="summary-strip" aria-label="Résumé de la requête">
-          <div><span class="summary-label">Période</span><strong id="period-summary">Dernières 24 heures</strong></div>
-          <div><span class="summary-label">Provider</span><strong id="provider-summary">Données de démonstration</strong></div>
-          <div><span class="summary-label">Points</span><strong id="points-summary">—</strong></div>
-          <div><span class="summary-label">État</span><strong class="ready"><i></i><span id="state-summary">Prêt</span></strong></div>
-        </section>
-
-        <section class="chart-card">
-          <div class="card-heading"><div><h2>Évolution</h2><p id="chart-caption">Trois mesures sélectionnées</p></div><div id="legend" class="legend"></div></div>
-          <div id="chart-frame" class="chart-frame" aria-label="Graphe des données historisées"><svg id="chart" viewBox="0 0 1000 360" preserveAspectRatio="none" role="img"></svg><div id="chart-empty" class="chart-empty" hidden><strong>Aucun path sélectionné</strong><span>Choisissez au moins une donnée dans la colonne de gauche.</span></div></div>
-          <div id="axis-labels" class="axis-labels"></div>
-        </section>
-
-        <section class="table-card">
-          <div class="card-heading"><div><h2>Valeurs</h2><p id="table-caption">Les mesures sont formatées pour la lecture.</p></div><span id="table-count" class="table-count"></span></div>
-          <div class="table-scroll"><table><thead id="table-head"></thead><tbody id="table-body"></tbody></table></div>
-        </section>
+        <div id="notice" class="notice" hidden></div>
+        <div id="path-groups" class="path-groups" aria-live="polite"></div>
       </section>
     </main>
     <div id="toast" role="status" aria-live="polite"></div>
