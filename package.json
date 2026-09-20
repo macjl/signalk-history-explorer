@@ -1,6 +1,6 @@
 {
   "name": "signalk-history-explorer",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Webapp to explore Signal K History API data",
   "main": "index.js",
   "keywords": [
