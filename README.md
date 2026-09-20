@@ -1,17 +1,18 @@
 # Signal K History Explorer
 
-Signal K webapp for discovering paths exposed by a History API provider, selecting a time range, charting values and exporting them to CSV.
+Signal K webapp for exploring paths recorded by a History API provider over a selected time range.
 
 ## Install
 
-Install `signalk-history-explorer` in the Signal K App Store, then open **History Explorer** from the Webapps menu. Select the URL of the Signal K server in the connection box (for example `http://localhost:3000`), then choose the paths and period to inspect.
+Install `signalk-history-explorer` in Signal K, then open **History Explorer** from the Webapps menu. The explorer uses the local Signal K server. Choose a start and end date, filter the available paths, then expand a path to read its values.
 
 The plugin uses the History API v2 endpoints, so it requires an active history provider such as `signalk-to-influxdb2`, `signalk-parquet`, or `signalk-questdb`.
 
 ## MVP scope
 
-- paths search and multi-selection;
-- quick or custom date ranges;
-- history query, line chart and readable table;
-- CSV export;
-- a demo mode available when no Signal K server is selected.
+- start and end date selection;
+- path filtering and collapsible path groups;
+- lazy loading: path values are requested only when a path is expanded;
+- numeric chart and chronological value table;
+- chronological text and state values;
+- displayed source and unit when supplied by the History API.

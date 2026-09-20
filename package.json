@@ -3,6 +3,9 @@
   "version": "0.2.9",
   "description": "Webapp to explore Signal K History API data",
   "main": "index.js",
+  "scripts": {
+    "test": "node --check index.js && node --check public/app.js"
+  },
   "keywords": [
     "signalk-node-server-plugin",
     "signalk-webapp",
