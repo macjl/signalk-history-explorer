@@ -1,0 +1,27 @@
+{
+  "name": "signalk-history-explorer",
+  "version": "0.1.0",
+  "description": "Webapp to explore Signal K History API data",
+  "main": "index.js",
+  "keywords": [
+    "signalk-node-server-plugin",
+    "signalk-webapp",
+    "signalk-category-utility",
+    "signalk",
+    "history",
+    "timeseries"
+  ],
+  "files": [
+    "index.js",
+    "public",
+    "README.md"
+  ],
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "signalk": {
+    "displayName": "History Explorer"
+  },
+  "signalk-plugin-enabled-by-default": false
+}
