@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,25 +11,25 @@
     <main class="app-shell">
       <header class="app-header">
         <div class="brand"><span class="brand-mark">⌁</span><span>Signal K</span><strong>HISTORY EXPLORER</strong></div>
-        <div id="api-state" class="api-state"><i></i>Connexion à l’historique…</div>
+        <div id="api-state" class="api-state"><i></i><span data-i18n="connecting">Connecting to history…</span></div>
       </header>
 
-      <section class="period-bar" aria-label="Période à explorer">
-        <div class="period-copy"><span>Explorer la période</span><small>Les paths affichés ont des données dans cet intervalle.</small></div>
-        <label>Début<input id="from-date" type="datetime-local" /></label>
+      <section class="period-bar" aria-label="Period to explore" data-i18n-aria-label="periodAria">
+        <div class="period-copy"><span data-i18n="explorePeriod">Explore a period</span><small data-i18n="periodHelp">Listed paths have data within this interval.</small></div>
+        <label><span data-i18n="start">Start</span><input id="from-date" type="datetime-local" /></label>
         <span class="date-arrow">→</span>
-        <label>Fin<input id="to-date" type="datetime-local" /></label>
-        <button id="apply-period" class="primary-button">Rechercher</button>
+        <label><span data-i18n="end">End</span><input id="to-date" type="datetime-local" /></label>
+        <button id="apply-period" class="primary-button" data-i18n="search">Search</button>
       </section>
 
       <section class="explorer" aria-labelledby="explorer-title">
         <div class="explorer-heading">
-          <div><p class="eyebrow">HISTORIQUE DISPONIBLE</p><h1 id="explorer-title">Paths</h1><p id="range-caption">Choisissez une période pour découvrir les données.</p></div>
-          <div class="heading-actions"><button id="collapse-all" class="quiet-button">Tout replier</button></div>
+          <div><p class="eyebrow" data-i18n="availableHistory">AVAILABLE HISTORY</p><h1 id="explorer-title">Paths</h1><p id="range-caption" data-i18n="choosePeriod">Choose a period to discover the data.</p></div>
+          <div class="heading-actions"><button id="collapse-all" class="quiet-button" data-i18n="collapseAll">Collapse all</button></div>
         </div>
 
         <div class="path-toolbar">
-          <div class="search-box"><span>⌕</span><input id="path-filter" type="search" placeholder="Filtrer les paths, par ex. wind, propulsion, battery…" autocomplete="off" /></div>
+          <div class="search-box"><span>⌕</span><input id="path-filter" type="search" placeholder="Filter paths, e.g. wind, propulsion, battery…" data-i18n-placeholder="pathFilter" autocomplete="off" /></div>
           <span id="paths-count" class="result-count">—</span>
         </div>
 
