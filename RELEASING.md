@@ -36,19 +36,21 @@ after confirming the publish. Do not run this sequence from the plugin checkout.
 
 ## Configure trusted publishing
 
-In the package's npmjs.com **Settings > Trusted publishing**, add a GitHub
-Actions publisher with these values:
+After the `0.0.1` bootstrap package is visible on npm, use npm CLI 11.15.0 or
+later and an npm account with 2FA enabled:
 
-| Field | Value |
-| --- | --- |
-| Organization or user | `macjl` |
-| Repository | `signalk-history-explorer` |
-| Workflow filename | `publish.yml` |
-| Environment name | Leave empty |
-| Allowed actions | Enable direct `npm publish` |
+```sh
+npm trust github signalk-history-explorer \
+  --repo macjl/signalk-history-explorer \
+  --file publish.yml \
+  --allow-publish \
+  --registry=https://registry.npmjs.org
+npm trust list signalk-history-explorer --registry=https://registry.npmjs.org
+```
 
-The npm form takes the workflow filename, not its full path. No `NPM_TOKEN`
-secret is needed.
+The `--file` value is only the workflow filename, not its full path. No
+environment is configured. The `--allow-publish` permission is required because
+the workflow runs `npm publish`. No `NPM_TOKEN` secret is needed.
 
 For each release, update `package.json`, `package-lock.json`, and `CHANGELOG.md`,
 run `npm ci`, `npm test`, and `npm pack --dry-run`, then push the release commit.
