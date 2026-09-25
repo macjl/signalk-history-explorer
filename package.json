@@ -1,6 +1,6 @@
 {
   "name": "signalk-history-explorer",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "Webapp to explore Signal K History API data",
   "main": "index.js",
   "scripts": {
@@ -34,5 +34,5 @@
   "signalk": {
     "displayName": "History Explorer"
   },
-  "signalk-plugin-enabled-by-default": false
+  "signalk-plugin-enabled-by-default": true
 }

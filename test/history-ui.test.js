@@ -3,6 +3,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
+test('plugin starts by default when it has no saved enable/disable setting', () => {
+  const metadata = require('../package.json');
+  assert.equal(metadata['signalk-plugin-enabled-by-default'], true);
+});
+
 function createApp(fetch) {
   const fields = {
     '#from-date': { value: '2026-09-20T00:00' },

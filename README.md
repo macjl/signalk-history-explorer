@@ -4,7 +4,7 @@ Signal K webapp for exploring paths recorded by a History API provider over a se
 
 ## Install
 
-Install `signalk-history-explorer` in Signal K, then open **History Explorer** from the Webapps menu. The explorer uses the local Signal K server. Choose a context (boat) or **ALL**, a start and end date, filter the available paths, then expand a path to read its values. ALL queries each context for the opened path and merges the results by timestamp. Every value displays its context and source when available.
+Install `signalk-history-explorer` in Signal K. It enables itself when the server restarts after installation, unless you have explicitly disabled it. Then open **History Explorer** from the Webapps menu. The explorer uses the local Signal K server. Choose a context (boat) or **ALL**, a start and end date, filter the available paths, then expand a path to read its values. ALL queries each context for the opened path and merges the results by timestamp. Every value displays its context and source when available.
 
 The plugin uses the History API v2 endpoints, so it requires an active history provider such as `signalk-to-influxdb2`, `signalk-parquet`, or `signalk-questdb`.
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Enable the plugin automatically after installation when it has no existing enable/disable setting.
+
 ## 0.2.11 - 2026-09-25
 
 - Explore paths recorded by a Signal K History API provider over a selected time range.
