@@ -12,6 +12,7 @@ The plugin uses the History API v2 endpoints, so it requires an active history p
 
 - start and end date selection;
 - context (boat) selection from the History API, including ALL;
+- the effective History API provider identifier in the period bar;
 - path filtering and collapsible path groups;
 - lazy loading: path values are requested only when a path is expanded;
 - numeric chart and chronological value table;

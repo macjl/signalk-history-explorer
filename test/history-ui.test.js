@@ -11,12 +11,20 @@ test('plugin starts by default when it has no saved enable/disable setting', () 
 function createApp(fetch) {
   const fields = {
     '#from-date': { value: '2026-09-20T00:00' },
-    '#to-date': { value: '2026-09-20T01:00' }
+    '#to-date': { value: '2026-09-20T01:00' },
+    '#provider-id': { textContent: '' },
+    '#context-select': { replaceChildren() {} },
+    '#path-filter': { value: '' },
+    '#api-state': {},
+    '#notice': {},
+    '#paths-count': {},
+    '#path-groups': {},
+    '#range-caption': {}
   };
   const sandbox = {
     navigator: { language: 'en' },
     location: { origin: 'http://localhost:3000', hostname: 'localhost' },
-    document: { addEventListener() {}, querySelector: selector => fields[selector] },
+    document: { addEventListener() {}, querySelector: selector => fields[selector], querySelectorAll: () => [], createElement: () => ({}) },
     fetch,
     URLSearchParams,
     Intl,
@@ -24,9 +32,36 @@ function createApp(fetch) {
   };
   vm.createContext(sandbox);
   const source = fs.readFileSync('public/app.js', 'utf8');
-  vm.runInContext(source + '\nthis.app = { state, loadValues, tableRows, historyRows, sparkline };', sandbox);
-  return sandbox.app;
+  vm.runInContext(source + '\nthis.app = { state, loadPaths, loadValues, tableRows, historyRows, sparkline };', sandbox);
+  return { ...sandbox.app, fields };
 }
+
+test('shows the effective provider and sends all History queries to it', async () => {
+  const requests = [];
+  let currentProvider = 'history-a';
+  const app = createApp(async url => {
+    const parsed = new URL(url);
+    requests.push(parsed);
+    if (parsed.pathname.endsWith('/_providers/_default')) return { ok: true, json: async () => ({ id: currentProvider }) };
+    if (parsed.pathname.endsWith('/contexts')) return { ok: true, json: async () => ['vessels.self'] };
+    if (parsed.pathname.endsWith('/paths')) return { ok: true, json: async () => ['navigation.speedOverGround'] };
+    if (parsed.pathname.endsWith('/values')) return { ok: true, json: async () => ({ values: [{}], data: [['2026-09-20T00:20:00Z', 5]] }) };
+    if (parsed.pathname.endsWith('/meta')) return { ok: false };
+    throw new Error(`Unexpected request: ${url}`);
+  });
+
+  await app.loadPaths();
+  assert.equal(app.fields['#provider-id'].textContent, 'history-a');
+  await app.loadValues('navigation.speedOverGround');
+  assert.deepEqual(requests.filter(request => /\/(contexts|paths|values)$/.test(request.pathname)).map(request => request.searchParams.get('provider')), ['history-a', 'history-a', 'history-a']);
+
+  currentProvider = 'history-b';
+  app.state.sourcePolicySupported = false;
+  await app.loadPaths({ refreshContexts: false });
+  assert.equal(app.fields['#provider-id'].textContent, 'history-b');
+  assert.equal(app.state.sourcePolicySupported, true);
+  assert.deepEqual(requests.filter(request => /\/(contexts|paths)$/.test(request.pathname)).slice(-2).map(request => request.searchParams.get('provider')), ['history-b', 'history-b']);
+});
 
 test('ALL reads each context, retains separate sources, and sorts merged values', async () => {
   const requests = [];

@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.2.12 - 2026-09-25
 
 - Enable the plugin automatically after installation when it has no existing enable/disable setting.
+- Show the effective History API provider in the period bar and direct context, path, and value queries to it.
 
 ## 0.2.11 - 2026-09-25
 

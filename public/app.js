@@ -2,7 +2,7 @@ const demoPaths = ['navigation.speedOverGround','navigation.courseOverGroundTrue
 const units = { 'navigation.speedOverGround':'kn', 'environment.wind.speedApparent':'kn', 'environment.wind.angleApparent':'°', 'environment.outside.temperature':'°C', 'environment.outside.pressure':'hPa', 'propulsion.0.revolutions':'tr/min', 'propulsion.0.temperature':'°C', 'electrical.batteries.house.voltage':'V', 'navigation.courseOverGroundTrue':'°T' };
 const HISTORY_PAGE_SIZE = 10000;
 const ALL_CONTEXTS = '__all__';
-const state = { server: location.origin, provider: '', providerChecked: false, sourcePolicySupported: true, context: 'vessels.self', contexts: [], paths: [], details: new Map(), opened: '', queryVersion: 0, mock: location.hostname.endsWith('chatgpt.site') };
+const state = { server: location.origin, provider: '', sourcePolicySupported: true, context: 'vessels.self', contexts: [], paths: [], details: new Map(), opened: '', queryVersion: 0, mock: location.hostname.endsWith('chatgpt.site') };
 const $ = s => document.querySelector(s);
 const escapeHTML = s => String(s).replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
 const language = navigator.language?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
@@ -11,6 +11,8 @@ const messages = {
   en: { connecting:'Connecting to history…', periodAria:'Period to explore', explorePeriod:'Explore a period', periodHelp:'Listed paths have data within this interval.', context:'Context', allContexts:'ALL — all contexts', loadingContexts:'Loading contexts…', thisVessel:'This vessel', start:'Start', end:'End', search:'Search', availableHistory:'AVAILABLE HISTORY', choosePeriod:'Choose a period to discover the data.', collapseAll:'Collapse all', pathFilter:'Filter paths, e.g. wind, propulsion, battery…', invalidPeriod:'The start date must be earlier than the end date.', sourceGroup:'Source · {source}', fromTo:'From {from} to {to}', paths:'path', noResults:'No path matches this filter for this period.', numeric:'numeric', textState:'text / state', openToInspect:'open to inspect', openPath:'Open this path to read its values.', readingValues:'Reading values…', densePeriod:'Dense period: reading in sub-ranges ({count} requests)…', cannotRead:'Unable to read this path: {error}', authenticationRequired:'Signal K authentication required', tooDense:'The period is too dense to be read in full. Reduce it.', noValues:'No values in this period.', readings:'Readings', unit:'Unit', requests:'Requests', minimum:'Minimum', maximum:'Maximum', latest:'Latest', evolution:'Evolution of {path}', timestamp:'Timestamp', value:'Value', source:'Source', events:'Events', type:'Type', demoMode:'Demo mode', searchingPaths:'Searching paths…', signInFirst:'Sign in to Signal K first.', historyUnavailable:'The History API provider is unavailable.', cannotList:'Unable to list paths (HTTP {status}).', cannotListContexts:'Unable to list contexts (HTTP {status}).', pathsAvailable:'{count} paths available', historyUnavailableStatus:'History unavailable' },
   fr: { connecting:'Connexion à l’historique…', periodAria:'Période à explorer', explorePeriod:'Explorer la période', periodHelp:'Les paths affichés ont des données dans cet intervalle.', context:'Contexte', allContexts:'ALL — tous les contextes', loadingContexts:'Chargement des contextes…', thisVessel:'Ce bateau', start:'Début', end:'Fin', search:'Rechercher', availableHistory:'HISTORIQUE DISPONIBLE', choosePeriod:'Choisissez une période pour découvrir les données.', collapseAll:'Tout replier', pathFilter:'Filtrer les paths, par ex. wind, propulsion, battery…', invalidPeriod:'La date de début doit être antérieure à la date de fin.', sourceGroup:'Source · {source}', fromTo:'Du {from} au {to}', paths:'path', noResults:'Aucun path ne correspond à ce filtre pour cette période.', numeric:'numérique', textState:'texte / état', openToInspect:'ouvrir pour consulter', openPath:'Ouvrez ce path pour lire ses valeurs.', readingValues:'Lecture des valeurs…', densePeriod:'Période dense : lecture par sous-plages ({count} requêtes)…', cannotRead:'Impossible de lire ce path : {error}', authenticationRequired:'authentification Signal K requise', tooDense:'La période est trop dense pour être lue intégralement. Réduisez-la.', noValues:'Aucune valeur dans cette période.', readings:'Relevés', unit:'Unité', requests:'Requêtes', minimum:'Minimum', maximum:'Maximum', latest:'Dernière', evolution:'Évolution de {path}', timestamp:'Horodatage', value:'Valeur', source:'Source', events:'Événements', type:'Type', demoMode:'Mode démonstration', searchingPaths:'Recherche des paths…', signInFirst:'Connectez-vous d’abord à Signal K.', historyUnavailable:'Le provider History API est indisponible.', cannotList:'Impossible de lister les paths (HTTP {status}).', cannotListContexts:'Impossible de lister les contextes (HTTP {status}).', pathsAvailable:'{count} paths disponibles', historyUnavailableStatus:'Historique indisponible' }
 };
+Object.assign(messages.en,{historyProvider:'History provider:',checkingProvider:'Checking…',providerUnavailable:'Unavailable'});
+Object.assign(messages.fr,{historyProvider:'Provider d’historique :',checkingProvider:'Vérification…',providerUnavailable:'Indisponible'});
 function t(key, values={}) { return messages[language][key].replace(/\{(\w+)\}/g, (_, name) => values[name] ?? ''); }
 function applyTranslations() { document.documentElement.lang=language; document.querySelectorAll('[data-i18n]').forEach(node=>node.textContent=t(node.dataset.i18n)); document.querySelectorAll('[data-i18n-placeholder]').forEach(node=>node.placeholder=t(node.dataset.i18nPlaceholder)); document.querySelectorAll('[data-i18n-aria-label]').forEach(node=>node.setAttribute('aria-label',t(node.dataset.i18nAriaLabel))); }
 const fmtDate = new Intl.DateTimeFormat(locale,{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -82,9 +84,52 @@ function sparkline(rows) { const limits=rows.reduce((acc,row)=>({min:Math.min(ac
 function seeded(seed) { let x=seed%2147483647; return ()=>((x=x*48271%2147483647)/2147483647); }
 function mockValues(path) { const [from,to]=period(),rand=seeded(+from/1e5),count=48; const rows=Array.from({length:count},(_,i)=>{let value;if(path.includes('position'))value={latitude:48.39+i*.0004,longitude:-4.49+i*.0002};else if(path.includes('revolutions'))value=18+5*Math.sin(i/5);else if(path.includes('temperature'))value=291+2*Math.sin(i/10);else if(path.includes('pressure'))value=101500+500*Math.sin(i/14);else if(path.includes('angle'))value=.9+.45*Math.sin(i/6);else if(path.includes('course'))value=4.2+.2*Math.sin(i/9);else if(path.includes('voltage'))value=12.7+Math.sin(i/8)*.1;else value=3.5+Math.sin(i/6)+rand()*.2;return {time:new Date(+from+(+to-+from)*i/(count-1)).toISOString(),value,context:state.context===ALL_CONTEXTS?state.contexts[i%state.contexts.length]:state.context,source:''};});return normalizeValues(rows,1,units[path]||''); }
 function renderContexts() { const select=$('#context-select'); const contexts=[...new Set(state.contexts)].sort((a,b)=>a==='vessels.self'?-1:b==='vessels.self'?1:a.localeCompare(b)); const all=document.createElement('option');all.value=ALL_CONTEXTS;all.textContent=t('allContexts'); select.replaceChildren(all,...contexts.map(context=>{const option=document.createElement('option'); option.value=context; option.textContent=context==='vessels.self'?`${context} — ${t('thisVessel')}`:context; return option;})); select.value=state.context; select.disabled=false; }
-async function loadContexts() { const select=$('#context-select'); select.disabled=true; if(state.mock){state.contexts=['vessels.self','vessels.urn:mrn:imo:mmsi:123456789']; renderContexts(); return;} const response=await fetch(`${state.server}/signalk/v2/api/history/contexts?${new URLSearchParams(timeRangeParams())}`); if(!response.ok)throw new Error(t('cannotListContexts',{status:response.status})); const result=await response.json(); const contexts=(Array.isArray(result)?result:[]).filter(context=>typeof context==='string'&&context); state.contexts=contexts.length?contexts:['vessels.self']; if(state.context!==ALL_CONTEXTS&&!state.contexts.includes(state.context))state.context=state.contexts.includes('vessels.self')?'vessels.self':state.contexts[0]; renderContexts(); }
-async function loadPaths({refreshContexts=true}={}) { const version=++state.queryVersion; try { const [from,to]=period(); state.details.clear(); setStatus(t('searchingPaths')); $('#notice').hidden=true; if(state.mock){if(refreshContexts)await loadContexts();state.paths=demoPaths.map(id=>({id}));setStatus(t('demoMode'),'ready');} else { if(!state.providerChecked){const providerResponse=await fetch(`${state.server}/signalk/v2/api/history/_providers`); if(!providerResponse.ok)throw new Error(providerResponse.status===401?t('signInFirst'):t('historyUnavailable')); const providers=await providerResponse.json(); state.provider=Array.isArray(providers)?(providers[0]?.id||providers[0]||''):''; state.providerChecked=true;} if(refreshContexts)await loadContexts(); const response=await fetch(`${state.server}/signalk/v2/api/history/paths?${queryParams({from:from.toISOString(),to:to.toISOString()})}`); if(!response.ok)throw new Error(t('cannotList',{status:response.status})); const result=await response.json(); if(version!==state.queryVersion)return; state.paths=(Array.isArray(result)?result:[]).map(item=>typeof item==='string'?{id:item}:{id:item.path,source:item.source}).filter(item=>item.id); setStatus(t('pathsAvailable',{count:state.paths.length}),'ready'); }
-    $('#range-caption').textContent=describePeriod(); renderPaths();
-  } catch(error) { if(version!==state.queryVersion)return; state.paths=[]; renderPaths(); setStatus(t('historyUnavailableStatus'),'error'); const n=$('#notice'); n.textContent=error.message; n.hidden=false; }
+async function loadContexts() { const select=$('#context-select'); select.disabled=true; if(state.mock){state.contexts=['vessels.self','vessels.urn:mrn:imo:mmsi:123456789']; renderContexts(); return;} const response=await fetch(`${state.server}/signalk/v2/api/history/contexts?${queryParams()}`); if(!response.ok)throw new Error(t('cannotListContexts',{status:response.status})); const result=await response.json(); const contexts=(Array.isArray(result)?result:[]).filter(context=>typeof context==='string'&&context); state.contexts=contexts.length?contexts:['vessels.self']; if(state.context!==ALL_CONTEXTS&&!state.contexts.includes(state.context))state.context=state.contexts.includes('vessels.self')?'vessels.self':state.contexts[0]; renderContexts(); }
+async function defaultHistoryProvider() {
+  const response=await fetch(`${state.server}/signalk/v2/api/history/_providers/_default`);
+  if(!response.ok)throw new Error(response.status===401?t('signInFirst'):t('historyUnavailable'));
+  const result=await response.json();
+  if(typeof result?.id!=='string'||!result.id)throw new Error(t('historyUnavailable'));
+  return result.id;
+}
+async function loadPaths({refreshContexts=true}={}) {
+  const version=++state.queryVersion;
+  $('#provider-id').textContent=t('checkingProvider');
+  try {
+    const [from,to]=period();
+    state.details.clear();
+    setStatus(t('searchingPaths'));
+    $('#notice').hidden=true;
+    if(state.mock) {
+      $('#provider-id').textContent=t('demoMode');
+      if(refreshContexts)await loadContexts();
+      state.paths=demoPaths.map(id=>({id}));
+      setStatus(t('demoMode'),'ready');
+    } else {
+      const provider=await defaultHistoryProvider();
+      if(version!==state.queryVersion)return;
+      const providerChanged=provider!==state.provider;
+      state.provider=provider;
+      if(providerChanged)state.sourcePolicySupported=true;
+      $('#provider-id').textContent=provider;
+      if(refreshContexts||providerChanged)await loadContexts();
+      if(version!==state.queryVersion)return;
+      const response=await fetch(`${state.server}/signalk/v2/api/history/paths?${queryParams({from:from.toISOString(),to:to.toISOString()})}`);
+      if(!response.ok)throw new Error(t('cannotList',{status:response.status}));
+      const result=await response.json();
+      if(version!==state.queryVersion)return;
+      state.paths=(Array.isArray(result)?result:[]).map(item=>typeof item==='string'?{id:item}:{id:item.path,source:item.source}).filter(item=>item.id);
+      setStatus(t('pathsAvailable',{count:state.paths.length}),'ready');
+    }
+    $('#range-caption').textContent=describePeriod();
+    renderPaths();
+  } catch(error) {
+    if(version!==state.queryVersion)return;
+    if($('#provider-id').textContent===t('checkingProvider'))$('#provider-id').textContent=t('providerUnavailable');
+    state.paths=[];
+    renderPaths();
+    setStatus(t('historyUnavailableStatus'),'error');
+    const n=$('#notice'); n.textContent=error.message; n.hidden=false;
+  }
 }
 document.addEventListener('DOMContentLoaded',()=>{applyTranslations();const now=new Date(),start=new Date(now-86400000); $('#from-date').value=isoToLocal(start);$('#to-date').value=isoToLocal(now);$('#apply-period').addEventListener('click',()=>loadPaths());$('#context-select').addEventListener('change',event=>{state.context=event.target.value;loadPaths({refreshContexts:false});});$('#path-filter').addEventListener('input',renderPaths);$('#collapse-all').addEventListener('click',()=>document.querySelectorAll('.path-details[open],.path-group[open]').forEach(x=>x.open=false));loadPaths();});
