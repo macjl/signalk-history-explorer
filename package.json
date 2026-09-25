@@ -1,10 +1,10 @@
 {
   "name": "signalk-history-explorer",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "Webapp to explore Signal K History API data",
   "main": "index.js",
   "scripts": {
-    "test": "node --check index.js && node --check public/app.js"
+    "test": "node --check index.js && node --check public/app.js && node test/history-ui.test.js"
   },
   "keywords": [
     "signalk-node-server-plugin",
