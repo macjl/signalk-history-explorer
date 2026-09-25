@@ -30,9 +30,11 @@ npm pack --dry-run
 npm publish --registry=https://registry.npmjs.org --access public --tag bootstrap
 ```
 
-The `bootstrap` dist-tag keeps the empty version off `latest`; the first real
-release will use `latest` by default. The temporary directory can be removed
-after confirming the publish. Do not run this sequence from the plugin checkout.
+The `bootstrap` dist-tag identifies the empty version, but npm may also point
+`latest` to this first published version until a real release is published.
+The first real release updates `latest`. The temporary directory can be
+removed after confirming the publish. Do not run this sequence from the plugin
+checkout.
 
 ## Configure trusted publishing
 
