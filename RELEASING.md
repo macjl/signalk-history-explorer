@@ -8,7 +8,7 @@ Release until the first-publish setup below is complete.
 ## Bootstrap the package once
 
 npm requires a package to exist before a trusted publisher can be configured.
-Publish an empty placeholder version, such as `0.0.1`, manually under the
+Publish an empty placeholder version `0.0.1` manually under the
 `signalk-history-explorer` name. Do not publish the actual plugin version
 locally: its first publication should come from the GitHub workflow with OIDC
 and provenance. This step requires access to the `macjl` npm account.
