@@ -17,9 +17,17 @@
   "files": [
     "index.js",
     "public",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
+  "author": "Jean-Laurent Girod (@macjl)",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/macjl/signalk-history-explorer.git"
+  },
+  "homepage": "https://github.com/macjl/signalk-history-explorer#readme",
+  "bugs": "https://github.com/macjl/signalk-history-explorer/issues",
   "engines": {
     "node": ">=18"
   },

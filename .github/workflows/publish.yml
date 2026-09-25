@@ -56,6 +56,13 @@ jobs:
             exit 1
           fi
 
+      - name: Verify npm package exists
+        run: |
+          if ! npm view "${{ steps.package.outputs.name }}" name >/dev/null 2>&1; then
+            echo "::error::The npm package must be bootstrapped before trusted publishing can be configured. See RELEASING.md."
+            exit 1
+          fi
+
       - name: Check npm version
         id: npm
         run: |
